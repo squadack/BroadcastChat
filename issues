@@ -1,0 +1,6 @@
+1. dorobic Opcje dla usera (pokazywanie godziny, kolorki On/Off, etc)
+2. dodac subklasę QLabel ktora ogarnie zmiany zarowno tresci jak i koloru niezaleznie
+3. Uprojektowić całość
+4. Notyfikacje - OK, coś jes zrobione xD
+5. Ctrl + C / focus - keypressevent != QKeySequence::Copy na czacie fokusuje spowrotem na lineedit
+6. historia wpisywanych rzeczy
