@@ -181,6 +181,7 @@ void ChatWindow::broadcastMessage()
 		m.setSender(nickname);
 		m.setSenderColor(nickcolor);
 		m.setMessage(lineedit->text());
+		m.setFormat(0);
 		QByteArray datagram;
 		m.prepareMessage(&datagram);
 

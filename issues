@@ -4,3 +4,4 @@
 4. Notyfikacje - OK, coś jes zrobione xD
 5. Ctrl + C / focus - keypressevent != QKeySequence::Copy na czacie fokusuje spowrotem na lineedit
 6. historia wpisywanych rzeczy
+7. dodac w protokole informacje o formatowaniu tekstu + wykorzystac tę informację przy wypisywaniu wiadomości
