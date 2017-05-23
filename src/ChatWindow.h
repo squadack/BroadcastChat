@@ -2,6 +2,7 @@
 
 #include <QtWidgets>
 #include <QtNetwork>
+#include "Message.h"
 
 class ChatWindow : public QMainWindow
 {
@@ -21,8 +22,7 @@ private:
 	static QColor getRandomColor();
 	void processPendingDatagrams();
 	//TODO message class
-	bool parseDatagram(const QByteArray &, QString *, QColor *, QString *);
-	void printMessage(const QString &, const QString &, QColor);
+	void printMessage(const Message &);
 	
 	void broadcastMessage();
 	void readSettings();

@@ -1,6 +1,7 @@
 set (SOURCES
 	main.cpp
 	ChatWindow.cpp
+	Message.cpp
 )
 
 add_executable (${PROJECT_NAME} ${SOURCES})

@@ -116,16 +116,7 @@ void ChatWindow::setNickColor(QColor c)
 				.arg(nickname));
 }
 
-bool ChatWindow::parseDatagram(const QByteArray &datagram, QString *nick, QColor *color, QString *msg)
-{
-	QDataStream in{datagram};
-	in >> *nick >> *color >> *msg;
-	if (in.status() != QDataStream::Ok)
-		return false;
-	return true;
-}
-
-void ChatWindow::printMessage(const QString &msg, const QString &nick, QColor color)
+void ChatWindow::printMessage(const Message &m)
 {
 	QString line;
 	
@@ -136,19 +127,20 @@ void ChatWindow::printMessage(const QString &msg, const QString &nick, QColor co
 			format = "yyyy-MM-dd ";
 		if (_showTime)
 			format += "HH:mm ";
-		line += QDateTime::currentDateTime().toString(format);
+		line += m.getReceivedTime().toString(format);
 	}
 
 	if (_colorNicks)
-		line += "<span style=\"color:" + color.name() + ";\">";
-	line += nick;
+		line += "<span style=\"color:" + m.getSenderColor().name() + ";\">";
+	line += m.getSender();
 	if (_colorNicks) 
 		line += "</span>: ";
 
-	QStringList list = msg.split(" ");
+	QStringList list = m.getMessage().split(" ");
 	QUrl url;
 	for (QString& str : list)
 	{
+		//NOTE czy QUrl wgl potrzebny?
 		url.setUrl(str, QUrl::StrictMode);
 		if (url.isValid() && (str.startsWith("http://") || str.startsWith("https://")))
 			str = "<a href=\"" + str + "\">" + str + "</a>";
@@ -160,7 +152,7 @@ void ChatWindow::printMessage(const QString &msg, const QString &nick, QColor co
 	if (!isActiveWindow())
 	{
 		sysicon->showMessage(QCoreApplication::applicationName() + " - " + tr("new message"),
-			QString{"%1: %2"}.arg(nick).arg(msg));
+			QString{"%1: %2"}.arg(m.getSender()).arg(m.getMessage()));
 	}
 }
 
@@ -172,11 +164,10 @@ void ChatWindow::processPendingDatagrams()
 		QByteArray datagram;
 		datagram.resize(udpsocket->pendingDatagramSize());
 		udpsocket->readDatagram(datagram.data(), datagram.size());
-		QString nick, message;
-		QColor color;
-		if (parseDatagram(datagram, &nick, &color, &message))
+		Message m;
+		if (m.parseMessage(datagram))
 		{
-			printMessage(message, nick, color);
+			printMessage(m);
 		}
 	}
 }
@@ -186,11 +177,12 @@ void ChatWindow::broadcastMessage()
 	if (!lineedit->text().isEmpty())
 	{
 		//NOTE Qt 5.8 QNetworkDatagram
+		Message m;
+		m.setSender(nickname);
+		m.setSenderColor(nickcolor);
+		m.setMessage(lineedit->text());
 		QByteArray datagram;
-		QDataStream out{&datagram, QIODevice::WriteOnly};
-		out << nickname;
-		out << nickcolor;
-		out << lineedit->text();
+		m.prepareMessage(&datagram);
 
 		udpsocket->writeDatagram(datagram.data(), datagram.size(), QHostAddress::Broadcast, PORT_NR);
 		lineedit->clear();
