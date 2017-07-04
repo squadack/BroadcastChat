@@ -32,6 +32,8 @@ int main(int argc, char **argv)
 	if (parser.isSet(optionShowColours))
 		qDebug() << "option show colours: SET!";
 
+	//TODO set options above as default in qsettings
+
 	ChatWindow window{nullptr};
 	window.show();
 

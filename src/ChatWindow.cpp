@@ -46,6 +46,12 @@ ChatWindow::ChatWindow(QWidget *parent)
 	quitAction->setShortcut(QKeySequence::Quit);
 	connect(quitAction, &QAction::triggered, this, &QMainWindow::close);
 
+	QAction *settingsAction = new QAction{tr("Settings"), this};
+	//settingsAction->setShortcut(QKeySequence::Settings); TODO set something
+	connect(settingsAction, &QAction::triggered, &settingsWindow, &QDialog::show);
+
+	//TODO other actions are deprecated
+
 	QAction *setNickAction = new QAction{tr("Set nickname"), this};
 	connect(setNickAction, &QAction::triggered, this, &ChatWindow::setNickname);
 
@@ -53,6 +59,7 @@ ChatWindow::ChatWindow(QWidget *parent)
 	connect(setNickColorAction, &QAction::triggered, this, &ChatWindow::nickColorDialog);
 
 	QMenu *menuMenu = this->menuBar()->addMenu(tr("Menu"));
+	menuMenu->addAction(settingsAction);
 	menuMenu->addAction(setNickAction);
 	menuMenu->addAction(setNickColorAction);
 	menuMenu->addAction(quitAction);
@@ -75,6 +82,10 @@ ChatWindow::ChatWindow(QWidget *parent)
 	_showDate = true;
 	_showTime = true;
 	_colorNicks = true;
+}
+
+void ChatWindow::openSettings()
+{
 }
 
 void ChatWindow::setNickname()
@@ -119,7 +130,7 @@ void ChatWindow::setNickColor(QColor c)
 void ChatWindow::printMessage(const Message &m)
 {
 	QString line;
-	
+
 	if (_showDate || _showTime)
 	{
 		QString format;
@@ -133,7 +144,7 @@ void ChatWindow::printMessage(const Message &m)
 	if (_colorNicks)
 		line += "<span style=\"color:" + m.getSenderColor().name() + ";\">";
 	line += m.getSender();
-	if (_colorNicks) 
+	if (_colorNicks)
 		line += "</span>: ";
 
 	QStringList list = m.getMessage().split(" ");
@@ -148,7 +159,7 @@ void ChatWindow::printMessage(const Message &m)
 	line += list.join(" ");
 
 	textarea->append(line);
-	
+
 	if (!isActiveWindow())
 	{
 		sysicon->showMessage(QCoreApplication::applicationName() + " - " + tr("new message"),
@@ -207,7 +218,7 @@ void ChatWindow::readSettings()
 	}
 
 	nickname = readNick(settings);
-	
+
 	QColor c = settings.value(Settings::NicknameColor, QColor{}).value<QColor>();
 	if (!c.isValid())
 		setNickColor(getRandomColor());

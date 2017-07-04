@@ -3,6 +3,7 @@
 #include <QtWidgets>
 #include <QtNetwork>
 #include "Message.h"
+#include "SettingsWindow.h"
 
 class ChatWindow : public QMainWindow
 {
@@ -11,10 +12,11 @@ public:
 	ChatWindow(QWidget *parent = nullptr);
 	ChatWindow(const ChatWindow &) = delete;
 	~ChatWindow() = default;
-	
+
 	ChatWindow & operator=(const ChatWindow &) = delete;
 
 private:
+	void openSettings();
 	void setNickname();
 	QString readNick(const QSettings &) const;
 	void setNickColor(QColor);
@@ -23,7 +25,7 @@ private:
 	void processPendingDatagrams();
 	//TODO message class
 	void printMessage(const Message &);
-	
+
 	void broadcastMessage();
 	void readSettings();
 	void closeEvent(QCloseEvent *);
@@ -34,12 +36,14 @@ private:
 	QLineEdit *lineedit;
 	QUdpSocket *udpsocket;
 	QSystemTrayIcon *sysicon;
+	SettingsWindow settingsWindow;
 	QString nickname;
 	QColor nickcolor;
-	
+
 	bool _showDate;
 	bool _showTime;
 	bool _colorNicks;
+
 signals:
 	void nickChanged(const QString &);
 };
