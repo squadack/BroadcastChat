@@ -46,10 +46,10 @@ ChatWindow::ChatWindow(QWidget *parent)
 	quitAction->setShortcut(QKeySequence::Quit);
 	connect(quitAction, &QAction::triggered, this, &QMainWindow::close);
 
-	QAction *setNickAction = new QAction{tr("Set nickname")};
+	QAction *setNickAction = new QAction{tr("Set nickname"), this};
 	connect(setNickAction, &QAction::triggered, this, &ChatWindow::setNickname);
 
-	QAction *setNickColorAction = new QAction{tr("Select nick color")};
+	QAction *setNickColorAction = new QAction{tr("Select nick color"), this};
 	connect(setNickColorAction, &QAction::triggered, this, &ChatWindow::nickColorDialog);
 
 	QMenu *menuMenu = this->menuBar()->addMenu(tr("Menu"));

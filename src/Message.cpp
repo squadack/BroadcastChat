@@ -5,7 +5,8 @@ void Message::prepareMessage(QByteArray *datagram) const
 	QDataStream out{datagram, QIODevice::WriteOnly};
 	out << sender;
 	out << sender_color;
-	Message::Format::Int flags = format;
+// 	Message::Format::Int flags = format;
+	out << format;
 	out << message;
 }
 
@@ -24,7 +25,7 @@ bool Message::parseMessage(const QByteArray &datagram)
 const QString & Message::getMessage() const
 {
 	return message;
-};
+}
 
 const QString & Message::getSender() const
 {
