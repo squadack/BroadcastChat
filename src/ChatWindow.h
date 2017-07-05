@@ -16,15 +16,10 @@ public:
 	ChatWindow & operator=(const ChatWindow &) = delete;
 
 private:
-	void openSettings();
 	void onSettingsChanged();
-	void setNickname();
-	QString readNick(const QSettings &) const;
-	void setNickColor(QColor);
-	void nickColorDialog();
-	static QColor getRandomColor();
 	void processPendingDatagrams();
 	//TODO message class
+	void onNewMessage(const Message &);
 	void printMessage(const Message &);
 
 	void broadcastMessage();
@@ -44,6 +39,9 @@ private:
 	bool _showDate;
 	bool _showTime;
 	bool _colorNicks;
+
+	//TODO store it somewhere, load on start, save on quit
+	QVector<Message> messages;
 
 signals:
 	void nickChanged(const QString &);

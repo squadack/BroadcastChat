@@ -1,7 +1,11 @@
-1. dorobic Opcje dla usera (pokazywanie godziny, kolorki On/Off, etc)
-2. dodac subklasę QLabel ktora ogarnie zmiany zarowno tresci jak i koloru niezaleznie
-3. Uprojektowić całość
-4. Notyfikacje - OK, coś jes zrobione xD
-5. Ctrl + C / focus - keypressevent != QKeySequence::Copy na czacie fokusuje spowrotem na lineedit
-6. historia wpisywanych rzeczy
-7. dodac w protokole informacje o formatowaniu tekstu + wykorzystac tę informację przy wypisywaniu wiadomości
+* Opcje: zrobić ładnie
+* Porządek z namespace'ami
+* Shortcut dla settings
+* Wyeliminować sygnał nickChanged, because srsly
+* Przenieść settings z subopcji menu jako osobne klikalne coś dla wygody użytkownika
+* dodac subklasę QLabel ktora ogarnie zmiany zarowno tresci jak i koloru niezaleznie
+* Uprojektowić całość
+* Notyfikacje - OK, coś jes zrobione xD
+* Ctrl + C / focus - keypressevent != QKeySequence::Copy na czacie fokusuje spowrotem na lineedit
+* historia wpisywanych rzeczy: zapis + odczyt
+* dodac w protokole informacje o formatowaniu tekstu + wykorzystac tę informację przy wypisywaniu wiadomości

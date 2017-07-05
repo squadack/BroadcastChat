@@ -75,10 +75,6 @@ ChatWindow::ChatWindow(QWidget *parent)
 	readSettings();
 }
 
-void ChatWindow::openSettings()
-{
-}
-
 void ChatWindow::onSettingsChanged()
 {
 	QSettings settings;
@@ -91,6 +87,12 @@ void ChatWindow::onSettingsChanged()
 	emit nickChanged(QString{"<span style=\"color:%1\">%2</span>"}
 		.arg(nickcolor.name())
 		.arg(nickname));
+}
+
+void ChatWindow::onNewMessage(const Message &m)
+{
+	messages.append(m);
+	printMessage(m);
 }
 
 void ChatWindow::printMessage(const Message &m)
@@ -145,9 +147,7 @@ void ChatWindow::processPendingDatagrams()
 		udpsocket->readDatagram(datagram.data(), datagram.size());
 		Message m;
 		if (m.parseMessage(datagram))
-		{
-			printMessage(m);
-		}
+			onNewMessage(m);
 	}
 }
 

@@ -64,6 +64,12 @@ void SettingsWindow::initSettings()
 		_settings.setValue(Settings::NicknameColour, getRandomColour());
 	if (!_settings.contains(Settings::Nickname))
 		_settings.setValue(Settings::Nickname, readNick());
+	if (!_settings.contains(Settings::ColorNicks))
+		_settings.setValue(Settings::ColorNicks, true);
+	if (!_settings.contains(Settings::ShowDate))
+		_settings.setValue(Settings::ShowDate, true);
+	if (!_settings.contains(Settings::ShowTime))
+		_settings.setValue(Settings::ShowTime, true);
 }
 
 void SettingsWindow::nickColourDialog()
