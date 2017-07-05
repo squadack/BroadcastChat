@@ -1,16 +1,22 @@
 #include "ChatWindow.h"
 
+//TODO general namespace Settings disaster
 namespace {
 namespace Settings {
 	const QString WindowGeometry{"windowGeometry"};
 	const QString Nickname{"nickname"};
 	const QString NicknameColor{"nicknameColor"};
+	const QString ColorNicks{"colorNicks"};
+	const QString ShowDate{"showDate"};
+	const QString ShowTime{"showTime"};
 }
 }
 
 ChatWindow::ChatWindow(QWidget *parent)
 	:QMainWindow{parent}
 {
+	connect(&settingsWindow, &SettingsWindow::settingsChanged, this, &ChatWindow::onSettingsChanged);
+
 	QWidget *central = new QWidget{this};
 	this->setCentralWidget(central);
 	QVBoxLayout *layout = new QVBoxLayout{};
@@ -50,18 +56,8 @@ ChatWindow::ChatWindow(QWidget *parent)
 	//settingsAction->setShortcut(QKeySequence::Settings); TODO set something
 	connect(settingsAction, &QAction::triggered, &settingsWindow, &QDialog::show);
 
-	//TODO other actions are deprecated
-
-	QAction *setNickAction = new QAction{tr("Set nickname"), this};
-	connect(setNickAction, &QAction::triggered, this, &ChatWindow::setNickname);
-
-	QAction *setNickColorAction = new QAction{tr("Select nick color"), this};
-	connect(setNickColorAction, &QAction::triggered, this, &ChatWindow::nickColorDialog);
-
 	QMenu *menuMenu = this->menuBar()->addMenu(tr("Menu"));
 	menuMenu->addAction(settingsAction);
-	menuMenu->addAction(setNickAction);
-	menuMenu->addAction(setNickColorAction);
 	menuMenu->addAction(quitAction);
 
 	central->setLayout(layout);
@@ -77,54 +73,24 @@ ChatWindow::ChatWindow(QWidget *parent)
 	connect(udpsocket, &QUdpSocket::readyRead, this, &ChatWindow::processPendingDatagrams);
 
 	readSettings();
-
-	//TODO placeholder
-	_showDate = true;
-	_showTime = true;
-	_colorNicks = true;
 }
 
 void ChatWindow::openSettings()
 {
 }
 
-void ChatWindow::setNickname()
+void ChatWindow::onSettingsChanged()
 {
-	bool ok;
-	QString text = QInputDialog::getText(this, tr("Set nickname"), tr("Nickname:"), QLineEdit::Normal, nickname, &ok);
-	text = text.simplified();
-	if (ok && !text.isEmpty() && text != nickname)
-	{
-		nickname = text;
-		QSettings settings;
-		settings.setValue(Settings::Nickname, nickname);
-		emit nickChanged(QString{"<span style=\"color:%1\">%2</span>"}
-				.arg(nickcolor.name())
-				.arg(nickname));
-	}
-}
-
-void ChatWindow::nickColorDialog()
-{
-	QColor c = QColorDialog::getColor(nickcolor, this, tr("Select nick color"));
-	if (c.isValid())
-		setNickColor(c);
-}
-
-QColor ChatWindow::getRandomColor()
-{
-	static const int MOD = ((1 << 8) - 1);
-	return QColor{qrand() & MOD, qrand() & MOD, qrand() & MOD};
-}
-
-void ChatWindow::setNickColor(QColor c)
-{
-	nickcolor = c;
 	QSettings settings;
-	settings.setValue(Settings::NicknameColor, nickcolor);
+	nickcolor = settings.value(Settings::NicknameColor).value<QColor>();
+	nickname = settings.value(Settings::Nickname).toString();
+	_colorNicks = settings.value(Settings::ColorNicks).toBool();
+	_showDate = settings.value(Settings::ShowDate).toBool();
+	_showTime = settings.value(Settings::ShowTime).toBool();
+	//TODO it can be probably done directly here, since setting everything is elsewhere now
 	emit nickChanged(QString{"<span style=\"color:%1\">%2</span>"}
-				.arg(nickcolor.name())
-				.arg(nickname));
+		.arg(nickcolor.name())
+		.arg(nickname));
 }
 
 void ChatWindow::printMessage(const Message &m)
@@ -146,6 +112,8 @@ void ChatWindow::printMessage(const Message &m)
 	line += m.getSender();
 	if (_colorNicks)
 		line += "</span>: ";
+	else
+		line += ": ";
 
 	QStringList list = m.getMessage().split(" ");
 	QUrl url;
@@ -217,30 +185,7 @@ void ChatWindow::readSettings()
 		restoreGeometry(geometry);
 	}
 
-	nickname = readNick(settings);
-
-	QColor c = settings.value(Settings::NicknameColor, QColor{}).value<QColor>();
-	if (!c.isValid())
-		setNickColor(getRandomColor());
-	else
-		setNickColor(c);
-}
-
-QString ChatWindow::readNick(const QSettings &settings) const
-{
-	static const QString DefaultNick = "Unnamed";
-	QString result = settings.value(Settings::Nickname, QString{}).toString();
-	if (!result.isEmpty())
-		return result;
-
-	for (const char *env : {"USER", "USERNAME"})
-	{
-		result = qgetenv(env);
-		if (!result.isEmpty())
-			return result;
-	}
-
-	return DefaultNick;
+	onSettingsChanged();
 }
 
 void ChatWindow::closeEvent(QCloseEvent *event)

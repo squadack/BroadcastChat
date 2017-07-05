@@ -17,6 +17,7 @@ public:
 
 private:
 	void openSettings();
+	void onSettingsChanged();
 	void setNickname();
 	QString readNick(const QSettings &) const;
 	void setNickColor(QColor);

@@ -1,26 +1,50 @@
 #include "SettingsWindow.h"
 
+//TODO Move somewhere more global?
 namespace Settings {
 	const QString Nickname{"nickname"};
 	const QString NicknameColour{"nicknameColor"};
+	const QString ColorNicks{"colorNicks"};
+	const QString ShowDate{"showDate"};
+	const QString ShowTime{"showTime"};
 }
 
-/* This object has no parent intentionally */
 SettingsWindow::SettingsWindow()
 {
+	initSettings();
+
 	QVBoxLayout *layout = new QVBoxLayout{};
 	//TODO make it pretty
 
-	QLabel *nickLabel = new QLabel{"Nick:"};
+	QLabel *nickLabel = new QLabel{tr("Nick") + ":"};
 	layout->addWidget(nickLabel);
-	QLineEdit *nickLineEdit = new QLineEdit{_settings.value(Settings::Nickname).toString()};
+	nickLineEdit = new QLineEdit{_settings.value(Settings::Nickname).toString()};
 	layout->addWidget(nickLineEdit);
-	QPushButton *nickConfirm = new QPushButton{"Change"};
+
+	QPushButton *nickConfirm = new QPushButton{tr("Change")};
+	nickConfirm->setFocusPolicy(Qt::NoFocus);
+	connect(nickConfirm, &QPushButton::clicked, this, &SettingsWindow::saveNick);
 	layout->addWidget(nickConfirm);
 
-	QPushButton *colourLabel = new QPushButton{"Colour"};
-	connect(colourLabel, &QPushButton::clicked, this, &SettingsWindow::nickColourDialog);
-	layout->addWidget(colourLabel);
+	QPushButton *colourButton = new QPushButton{tr("Colour")};
+	colourButton->setFocusPolicy(Qt::NoFocus);
+	connect(colourButton, &QPushButton::clicked, this, &SettingsWindow::nickColourDialog);
+	layout->addWidget(colourButton);
+
+	colourCheckbox = new QCheckBox{tr("Coloured nicks")};
+	colourCheckbox->setChecked(_settings.value(Settings::ColorNicks).toBool());
+	connect(colourCheckbox, &QCheckBox::stateChanged, this, &SettingsWindow::saveToggled);
+	layout->addWidget(colourCheckbox);
+
+	showDateCheckbox = new QCheckBox{tr("Show date")};
+	showDateCheckbox->setChecked(_settings.value(Settings::ShowDate).toBool());
+	connect(showDateCheckbox, &QCheckBox::stateChanged, this, &SettingsWindow::saveToggled);
+	layout->addWidget(showDateCheckbox);
+
+	showTimeCheckbox = new QCheckBox{tr("Show time")};
+	showTimeCheckbox->setChecked(_settings.value(Settings::ShowTime).toBool());
+	connect(showTimeCheckbox, &QCheckBox::stateChanged, this, &SettingsWindow::saveToggled);
+	layout->addWidget(showTimeCheckbox);
 
 	QPushButton *closeButton = new QPushButton{"Close"};
 	connect(closeButton, &QPushButton::clicked, this, &QDialog::close);
@@ -29,11 +53,13 @@ SettingsWindow::SettingsWindow()
 	setLayout(layout);
 }
 
-void SettingsWindow::setSettings(const QSettings &settings)
+const QSettings &SettingsWindow::settings() const
 {
-	for (s : {Settings::Nickname, Settings::NicknameColour})
-		if (settings.contains(s))
-			_settings.setValue(s, settings.value(s));
+	return _settings;
+}
+
+void SettingsWindow::initSettings()
+{
 	if (!_settings.contains(Settings::NicknameColour))
 		_settings.setValue(Settings::NicknameColour, getRandomColour());
 	if (!_settings.contains(Settings::Nickname))
@@ -42,9 +68,10 @@ void SettingsWindow::setSettings(const QSettings &settings)
 
 void SettingsWindow::nickColourDialog()
 {
-	QColor c = QColorDialog::getColor(_settings.value(Settings::NicknameColour).toString(),
+	QColor c = QColorDialog::getColor(_settings.value(Settings::NicknameColour).value<QColor>(),
 		this, tr("Select nick colour"));
-	setNickColour(c);
+	if (c.isValid())
+		setNickColour(c);
 }
 
 QColor SettingsWindow::getRandomColour() const
@@ -72,4 +99,20 @@ QString SettingsWindow::readNick() const
 			return result;
 	}
 	return DefaultNick;
+}
+
+void SettingsWindow::saveNick()
+{
+	QString text = nickLineEdit->text().simplified();
+	if (!text.isEmpty() && text != _settings.value(Settings::Nickname).toString())
+		_settings.setValue(Settings::Nickname, text);
+	emit settingsChanged();
+}
+
+void SettingsWindow::saveToggled()
+{
+	_settings.setValue(Settings::ColorNicks, colourCheckbox->isChecked());
+	_settings.setValue(Settings::ShowDate, showDateCheckbox->isChecked());
+	_settings.setValue(Settings::ShowTime, showTimeCheckbox->isChecked());
+	emit settingsChanged();
 }

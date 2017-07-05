@@ -8,13 +8,24 @@ class SettingsWindow : public QDialog
 public:
 	SettingsWindow();
 	void setSettings(const QSettings &);
+	const QSettings &settings() const;
 private:
+	void initSettings();
+
 	void nickColourDialog();
 	QColor getRandomColour() const;
 	void setNickColour(const QColor &);
-	QString readNick() const;
 
-	QSettings _settings;
+	QString readNick() const;
+	void saveNick();
+
+	void saveToggled();
+
+	QSettings _settings; //TODO remove?
+	QLineEdit *nickLineEdit;
+	QCheckBox *colourCheckbox;
+	QCheckBox *showDateCheckbox;
+	QCheckBox *showTimeCheckbox;
 signals:
 	void settingsChanged();
 };
